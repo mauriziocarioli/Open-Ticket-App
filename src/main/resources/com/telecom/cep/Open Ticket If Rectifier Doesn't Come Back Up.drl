@@ -1,0 +1,43 @@
+package com.telecom.open_ticket;
+
+import com.telecom.cep.AlertEvent;
+
+import java.util.Date;
+
+declare AlertEvent
+	@role(event)
+	@timestamp(_time)
+end
+
+global Long startTime;
+global Long startMemory;
+global Long totalFactCount;
+global java.util.HashMap issuesMap; 
+
+rule "Open Ticket If Rectifier Doesn't Come Back Back Up After 5 Minutes"
+dialect "mvel"
+no-loop
+	when
+		$rectifierIsDown: AlertEvent(
+			$time: _time,
+			$neName: neName, 
+			$serverSerial: serverSerial,
+			$summary: summary,
+			$circuit: circuit == "RECT - power",
+			severity == 4,
+			ncFunction == "INSERT")
+		not( AlertEvent(
+			serverSerial == $serverSerial,
+			circuit == $circuit,
+			ncFunction == "DELETE",
+			this after [0s, 5s] $rectifierIsDown) )
+	then
+		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		System.out.println("@");
+		System.out.println("@ Major alert at "+$neName);
+		System.out.println("@ Rectifier went down at "+(new Date($time)));
+		System.out.println("@ Rectifier did not come back up after 5m");
+		System.out.println("@ Opened ticket # SNN000000088773");			
+		System.out.println("@");
+		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+end
