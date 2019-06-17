@@ -46,9 +46,9 @@ public class AlertEventProcessing {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		System.out.println("==========================================================");
-		System.out.println("COMPLEX EVENT PROCESSING WITH DROOLS - STAND ALONE TEST");
-		System.out.println("==========================================================");
+		System.out.println("===========================================================");
+		System.out.println("| COMPLEX EVENT PROCESSING WITH DROOLS - STAND ALONE TEST |");
+		System.out.println("==========================================================+");
 
 		AlertEventProcessing droolsCEPService = AlertEventProcessing.getInstance();
 		
@@ -61,6 +61,32 @@ public class AlertEventProcessing {
 		alertEvent.setCircuit("RECT - power");
 		alertEvent.setSeverity(4);
 		alertEvent.setNcFunction("INSERT");			
+		droolsCEPService.execute(alertEvent);
+		
+		Thread.sleep(1000);
+
+		alertEvent = new AlertEvent();
+		alertEvent.set_time(new Date().getTime());
+		alertEvent.setNeName("bdhlmbch");
+		alertEvent.setAlertGroup("AC");
+		alertEvent.setServerSerial(1738805010L);
+		alertEvent.setSummary("BRANDON HILLS REMOTE AC FAIL MJ - C3E38");
+		alertEvent.setCircuit("AC - power");
+		alertEvent.setSeverity(0);
+		alertEvent.setNcFunction("INSERT");			
+		droolsCEPService.execute(alertEvent);
+		
+		Thread.sleep(1000);
+		
+		alertEvent = new AlertEvent();
+		alertEvent.set_time(new Date().getTime());
+		alertEvent.setNeName("bdhlmbch");
+		alertEvent.setAlertGroup("AC");
+		alertEvent.setServerSerial(1738805010L);
+		alertEvent.setSummary("BRANDON HILLS REMOTE AC FAIL MJ - C3E38");
+		alertEvent.setCircuit("AC - power");
+		alertEvent.setSeverity(0);
+		alertEvent.setNcFunction("DELETE");			
 		droolsCEPService.execute(alertEvent);
 		
 		Thread.sleep(1000);
