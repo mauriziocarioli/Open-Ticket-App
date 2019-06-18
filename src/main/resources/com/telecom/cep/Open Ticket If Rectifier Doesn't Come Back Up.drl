@@ -14,7 +14,7 @@ global Long startMemory;
 global Long totalFactCount;
 global java.util.HashMap issuesMap; 
 
-rule "Open Ticket If Rectifier Doesn't Come Back Back Up After 5 Minutes"
+rule "Open Ticket If Rectifier Doesn't Come Back Up After 5 Minutes"
 dialect "mvel"
 no-loop
 	when
@@ -40,9 +40,11 @@ no-loop
 		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 		System.out.println("@");
 		System.out.println("@ Major alert at "+$neName);
+		System.out.println("@ Summary: "+$summary);
 		System.out.println("@ Rectifier went down at "+(new Date($t0)));
-		System.out.println("@ Rectifier did not come back up after 5m");
-		System.out.println("@ Opened ticket # SNN000000088773");			
+		System.out.println("@ AC Power went back up at "+(new Date($t1)));
+		System.out.println("@ Rectifier did not come back up after 10m");
+		System.out.println("@ Opened ticket # SNN000000088773 at "+(new Date()));			
 		System.out.println("@");
 		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 end

@@ -4,38 +4,41 @@
 package com.telecom.cep;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 //import java.util.LinkedList;
 
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.time.SessionPseudoClock;
 
 import org.kie.api.event.rule.DebugAgendaEventListener;
 import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
 
-public class AlertEventProcessing {
+public class AlertEventProcessingPseudotime {
 
 	private static final String groupId = "com.telecom";
 	private static final String artifactId = "Open-Ticket-App";
 	private static final String version = "1.0.0-SNAPSHOT";
 
-	private static AlertEventProcessing cepService = null;
+	private static AlertEventProcessingPseudotime cepService = null;
 
 	// Drools Fusion Runtime Configuration
 	private KieServices kServices;
 	private KieContainer kContainer;
 	private KieSession kSession;
+	private SessionPseudoClock clock;
 
 	// memory sizing and reporting activities
 	static long totalFactCount = 0;
 
 	public static LinkListStack issues = new LinkListStack();
 
-	public static AlertEventProcessing getInstance() {
+	public static AlertEventProcessingPseudotime getInstance() {
 
 		if (cepService == null) {
-			cepService = new AlertEventProcessing();
+			cepService = new AlertEventProcessingPseudotime();
 			cepService.init();
 		}
 		return cepService;
@@ -50,10 +53,13 @@ public class AlertEventProcessing {
 		System.out.println("| COMPLEX EVENT PROCESSING WITH DROOLS - STAND ALONE TEST |");
 		System.out.println("==========================================================+");
 
-		AlertEventProcessing droolsCEPService = AlertEventProcessing.getInstance();
+		AlertEventProcessingPseudotime droolsCEPService = AlertEventProcessingPseudotime.getInstance();
+		
+		long t = 0L;
+		long pt = t;
 		
 		AlertEvent alertEvent = new AlertEvent();
-		alertEvent.set_time(new Date().getTime());
+		alertEvent.set_time(t);
 		System.out.println("_time: "+alertEvent.get_time());		
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("RECT");
@@ -62,12 +68,12 @@ public class AlertEventProcessing {
 		alertEvent.setCircuit("RECT - power");
 		alertEvent.setSeverity(4);
 		alertEvent.setNcFunction("INSERT");			
-		droolsCEPService.execute(alertEvent);
+		droolsCEPService.execute(alertEvent,pt);
 		
-		Thread.sleep(1000);
-
+		pt = t; t = t + 1000L;
+		
 		alertEvent = new AlertEvent();
-		alertEvent.set_time(new Date().getTime());
+		alertEvent.set_time(t);
 		System.out.println("_time: "+alertEvent.get_time());		
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("AC");
@@ -76,12 +82,12 @@ public class AlertEventProcessing {
 		alertEvent.setCircuit("AC - power");
 		alertEvent.setSeverity(0);
 		alertEvent.setNcFunction("INSERT");			
-		droolsCEPService.execute(alertEvent);
+		droolsCEPService.execute(alertEvent,pt);
 		
-		Thread.sleep(1000);
-		
+		pt = t; t = t + 1000L;
+
 		alertEvent = new AlertEvent();
-		alertEvent.set_time(new Date().getTime());
+		alertEvent.set_time(t);
 		System.out.println("_time: "+alertEvent.get_time());		
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("AC");
@@ -90,14 +96,14 @@ public class AlertEventProcessing {
 		alertEvent.setCircuit("AC - power");
 		alertEvent.setSeverity(0);
 		alertEvent.setNcFunction("DELETE");			
-		droolsCEPService.execute(alertEvent);
-		
-		Thread.sleep(1000);
+		droolsCEPService.execute(alertEvent,pt);
 		
 		while (true) {
 			
+			pt = t; t = t + 1000L;
+
 			alertEvent = new AlertEvent();
-			alertEvent.set_time(new Date().getTime());
+			alertEvent.set_time(t);
 			System.out.println("_time: "+alertEvent.get_time());		
 			alertEvent.setNeName("dummynename");
 			alertEvent.setAlertGroup("WFOWF");
@@ -106,9 +112,7 @@ public class AlertEventProcessing {
 			alertEvent.setCircuit("DUMMY CIRCUIT");
 			alertEvent.setSeverity(0);
 			alertEvent.setNcFunction("XYZ");			
-			droolsCEPService.execute(alertEvent);
-			
-			Thread.sleep(1000);
+			droolsCEPService.execute(alertEvent,pt);
 			
 		}
 		
@@ -127,6 +131,7 @@ public class AlertEventProcessing {
 			kSession = kContainer.newKieSession("default-stateful-kie-session");
 			kSession.addEventListener(new DebugAgendaEventListener());
 			kSession.addEventListener(new DebugRuleRuntimeEventListener());
+			clock = kSession.getSessionClock();
 			kServices.getLoggers().newConsoleLogger(kSession);
 			kServices.getLoggers().newFileLogger(kSession, "./target/drools");
 
@@ -143,7 +148,7 @@ public class AlertEventProcessing {
 
 	static long prevTime = 0, currTime = 0;
 
-	public void execute(AlertEvent event) {
+	public void execute(AlertEvent event, Long previousTime) {
 
 		// try {
 		System.out.println(">>>>>> RECEIVED AN ALERT");
@@ -151,6 +156,7 @@ public class AlertEventProcessing {
 		// anything to with event object
 		kSession.setGlobal("totalFactCount", totalFactCount++);
 		System.out.println(">>>>>> RUNNING THROUGH THE RULES..." + totalFactCount);
+		clock.advanceTime(event.get_time().longValue() - previousTime.longValue(), TimeUnit.MILLISECONDS);
 		kSession.insert(event);
 		kSession.fireAllRules();
 

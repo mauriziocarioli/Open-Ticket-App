@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -12,7 +11,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import com.telecom.cep.AlertEvent;
-import com.telecom.cep.AlertEventProcessing;
+import com.telecom.cep.AlertEventProcessingPseudotime;
 import com.telecom.cep.LinkListStack;
 
 public class AlertDataLoaderThread extends Thread {
@@ -57,9 +56,11 @@ public class AlertDataLoaderThread extends Thread {
 			rows = parser.getRecords();
 			parser.close();
 			
-			AlertEventProcessing droolsCEPService = AlertEventProcessing.getInstance();
+			AlertEventProcessingPseudotime droolsCEPService = AlertEventProcessingPseudotime.getInstance();
 			
 			while (true) {
+				
+				Long pt = new Long(0);
 				
 				for (int r = rows.size()-1; r > 0; r--) {
 
@@ -67,7 +68,10 @@ public class AlertDataLoaderThread extends Thread {
 					alertEvent = getData(alertEvent, rows, r);
 					/*
 					System.out.println("record: "+r+" =====================================================");
+					*/
+					Long t = alertEvent.get_time();
 					System.out.println("_time: "+alertEvent.get_time());
+					/*
 					System.out.println("acknowledged: "+alertEvent.getAknowledged());
 					System.out.println("agent: "+alertEvent.getAgent());
 					System.out.println("alert group: "+alertEvent.getAlertGroup());
@@ -82,12 +86,15 @@ public class AlertDataLoaderThread extends Thread {
 					System.out.println("tt number: "+alertEvent.getTtNumber());
 					System.out.println("nc function: "+alertEvent.getNcFunction());
 					*/
+					if (alertEvent.getNeName().equals("bdhlmbch")) 
+						System.out.println("###### USE CASE #######");
 					alerts.push(alertEvent);
-					droolsCEPService.execute(alertEvent);
+					droolsCEPService.execute(alertEvent,pt);
+					pt = t;
 
 				}
 				
-				Thread.sleep(10000);
+				Thread.sleep(60000);
 				
 			}
 			
