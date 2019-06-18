@@ -16,6 +16,11 @@ import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
 
 public class AlertEventProcessing {
 
+	/**
+	 *
+	 */
+
+	private static final String DEFAULT_STATEFUL_KIE_SESSION = "default-stateful-kie-session";
 	private static final String groupId = "com.telecom";
 	private static final String artifactId = "Open-Ticket-App";
 	private static final String version = "1.0.0-SNAPSHOT";
@@ -51,67 +56,67 @@ public class AlertEventProcessing {
 		System.out.println("==========================================================+");
 
 		AlertEventProcessing droolsCEPService = AlertEventProcessing.getInstance();
-		
+
 		AlertEvent alertEvent = new AlertEvent();
 		alertEvent.set_time(new Date().getTime());
-		System.out.println("_time: "+alertEvent.get_time());		
+		System.out.println("_time: " + alertEvent.get_time());
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("RECT");
 		alertEvent.setServerSerial(1738805008L);
 		alertEvent.setSummary("BRANDON HILLS REMOTE RECTIFIER FAIL MJR - C3E35");
 		alertEvent.setCircuit("RECT - power");
 		alertEvent.setSeverity(4);
-		alertEvent.setNcFunction("INSERT");			
+		alertEvent.setNcFunction("INSERT");
 		droolsCEPService.execute(alertEvent);
-		
+
 		Thread.sleep(1000);
 
 		alertEvent = new AlertEvent();
 		alertEvent.set_time(new Date().getTime());
-		System.out.println("_time: "+alertEvent.get_time());		
+		System.out.println("_time: " + alertEvent.get_time());
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("AC");
 		alertEvent.setServerSerial(1738805010L);
 		alertEvent.setSummary("BRANDON HILLS REMOTE AC FAIL MJ - C3E38");
 		alertEvent.setCircuit("AC - power");
 		alertEvent.setSeverity(0);
-		alertEvent.setNcFunction("INSERT");			
+		alertEvent.setNcFunction("INSERT");
 		droolsCEPService.execute(alertEvent);
-		
+
 		Thread.sleep(1000);
-		
+
 		alertEvent = new AlertEvent();
 		alertEvent.set_time(new Date().getTime());
-		System.out.println("_time: "+alertEvent.get_time());		
+		System.out.println("_time: " + alertEvent.get_time());
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("AC");
 		alertEvent.setServerSerial(1738805010L);
 		alertEvent.setSummary("BRANDON HILLS REMOTE AC FAIL MJ - C3E38");
 		alertEvent.setCircuit("AC - power");
 		alertEvent.setSeverity(0);
-		alertEvent.setNcFunction("DELETE");			
+		alertEvent.setNcFunction("DELETE");
 		droolsCEPService.execute(alertEvent);
-		
+
 		Thread.sleep(1000);
-		
+
 		while (true) {
-			
+
 			alertEvent = new AlertEvent();
 			alertEvent.set_time(new Date().getTime());
-			System.out.println("_time: "+alertEvent.get_time());		
+			System.out.println("_time: " + alertEvent.get_time());
 			alertEvent.setNeName("dummynename");
 			alertEvent.setAlertGroup("WFOWF");
 			alertEvent.setServerSerial(1738805008L);
 			alertEvent.setSummary("DUMMY SUMMARY");
 			alertEvent.setCircuit("DUMMY CIRCUIT");
 			alertEvent.setSeverity(0);
-			alertEvent.setNcFunction("XYZ");			
+			alertEvent.setNcFunction("XYZ");
 			droolsCEPService.execute(alertEvent);
-			
+
 			Thread.sleep(1000);
-			
+
 		}
-		
+
 	}
 
 	public void init() {
@@ -124,7 +129,7 @@ public class AlertEventProcessing {
 
 			kServices = KieServices.Factory.get();
 			kContainer = kServices.newKieContainer(kServices.newReleaseId(groupId, artifactId, version));
-			kSession = kContainer.newKieSession("default-stateful-kie-session");
+			kSession = kContainer.newKieSession(DEFAULT_STATEFUL_KIE_SESSION);
 			kSession.addEventListener(new DebugAgendaEventListener());
 			kSession.addEventListener(new DebugRuleRuntimeEventListener());
 			kServices.getLoggers().newConsoleLogger(kSession);

@@ -18,6 +18,11 @@ import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
 
 public class AlertEventProcessingPseudotime {
 
+	/**
+	 *
+	 */
+
+	private static final String PSEUDOTIME_STATEFUL_KIE_SESSION = "pseudotime-stateful-kie-session";
 	private static final String groupId = "com.telecom";
 	private static final String artifactId = "Open-Ticket-App";
 	private static final String version = "1.0.0-SNAPSHOT";
@@ -54,68 +59,71 @@ public class AlertEventProcessingPseudotime {
 		System.out.println("==========================================================+");
 
 		AlertEventProcessingPseudotime droolsCEPService = AlertEventProcessingPseudotime.getInstance();
-		
+
 		long t = 0L;
 		long pt = t;
-		
+
 		AlertEvent alertEvent = new AlertEvent();
 		alertEvent.set_time(t);
-		System.out.println("_time: "+alertEvent.get_time());		
+		System.out.println("_time: " + alertEvent.get_time());
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("RECT");
 		alertEvent.setServerSerial(1738805008L);
 		alertEvent.setSummary("BRANDON HILLS REMOTE RECTIFIER FAIL MJR - C3E35");
 		alertEvent.setCircuit("RECT - power");
 		alertEvent.setSeverity(4);
-		alertEvent.setNcFunction("INSERT");			
-		droolsCEPService.execute(alertEvent,pt);
-		
-		pt = t; t = t + 1000L;
-		
-		alertEvent = new AlertEvent();
-		alertEvent.set_time(t);
-		System.out.println("_time: "+alertEvent.get_time());		
-		alertEvent.setNeName("bdhlmbch");
-		alertEvent.setAlertGroup("AC");
-		alertEvent.setServerSerial(1738805010L);
-		alertEvent.setSummary("BRANDON HILLS REMOTE AC FAIL MJ - C3E38");
-		alertEvent.setCircuit("AC - power");
-		alertEvent.setSeverity(0);
-		alertEvent.setNcFunction("INSERT");			
-		droolsCEPService.execute(alertEvent,pt);
-		
-		pt = t; t = t + 1000L;
+		alertEvent.setNcFunction("INSERT");
+		droolsCEPService.execute(alertEvent, pt);
+
+		pt = t;
+		t = t + 1000L;
 
 		alertEvent = new AlertEvent();
 		alertEvent.set_time(t);
-		System.out.println("_time: "+alertEvent.get_time());		
+		System.out.println("_time: " + alertEvent.get_time());
 		alertEvent.setNeName("bdhlmbch");
 		alertEvent.setAlertGroup("AC");
 		alertEvent.setServerSerial(1738805010L);
 		alertEvent.setSummary("BRANDON HILLS REMOTE AC FAIL MJ - C3E38");
 		alertEvent.setCircuit("AC - power");
 		alertEvent.setSeverity(0);
-		alertEvent.setNcFunction("DELETE");			
-		droolsCEPService.execute(alertEvent,pt);
-		
+		alertEvent.setNcFunction("INSERT");
+		droolsCEPService.execute(alertEvent, pt);
+
+		pt = t;
+		t = t + 1000L;
+
+		alertEvent = new AlertEvent();
+		alertEvent.set_time(t);
+		System.out.println("_time: " + alertEvent.get_time());
+		alertEvent.setNeName("bdhlmbch");
+		alertEvent.setAlertGroup("AC");
+		alertEvent.setServerSerial(1738805010L);
+		alertEvent.setSummary("BRANDON HILLS REMOTE AC FAIL MJ - C3E38");
+		alertEvent.setCircuit("AC - power");
+		alertEvent.setSeverity(0);
+		alertEvent.setNcFunction("DELETE");
+		droolsCEPService.execute(alertEvent, pt);
+
 		while (true) {
-			
-			pt = t; t = t + 1000L;
+
+			pt = t;
+			t = t + 1000L;
 
 			alertEvent = new AlertEvent();
 			alertEvent.set_time(t);
-			System.out.println("_time: "+alertEvent.get_time());		
+			System.out.println("_time: " + alertEvent.get_time());
 			alertEvent.setNeName("dummynename");
 			alertEvent.setAlertGroup("WFOWF");
 			alertEvent.setServerSerial(1738805008L);
 			alertEvent.setSummary("DUMMY SUMMARY");
 			alertEvent.setCircuit("DUMMY CIRCUIT");
 			alertEvent.setSeverity(0);
-			alertEvent.setNcFunction("XYZ");			
-			droolsCEPService.execute(alertEvent,pt);
-			
+			alertEvent.setNcFunction("XYZ");
+			droolsCEPService.execute(alertEvent, pt);
+
 		}
-		
+
 	}
 
 	public void init() {
@@ -128,7 +136,7 @@ public class AlertEventProcessingPseudotime {
 
 			kServices = KieServices.Factory.get();
 			kContainer = kServices.newKieContainer(kServices.newReleaseId(groupId, artifactId, version));
-			kSession = kContainer.newKieSession("default-stateful-kie-session");
+			kSession = kContainer.newKieSession(PSEUDOTIME_STATEFUL_KIE_SESSION);
 			kSession.addEventListener(new DebugAgendaEventListener());
 			kSession.addEventListener(new DebugRuleRuntimeEventListener());
 			clock = kSession.getSessionClock();
