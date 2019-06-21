@@ -1,0 +1,13 @@
+package com.telecom;
+
+import java.lang.Number;
+
+rule "Delete Issue After Ticket Is Created"
+	dialect "mvel"
+	when
+		TicketCreated( $issueId : issueId)
+		$issue : Issue( issueId == $issueId ) from issues.list
+	then
+		issues.delete( $issue );
+		System.out.println(">>>>>>>> Issue # "+$issueId+" has been deleted.");
+end

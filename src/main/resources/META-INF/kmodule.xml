@@ -1,7 +1,6 @@
 <kmodule xmlns="http://www.drools.org/xsd/kmodule" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <kbase name="default-kie-base" default="true" eventProcessingMode="stream" equalsBehavior="identity">
-    <ksession name="default-stateless-kie-session" type="stateless" default="false" clockType="realtime" />
-    <ksession name="default-stateful-kie-session" type="stateful" default="true" clockType="realtime" />
-    <ksession name="pseudotime-stateful-kie-session" type="stateful" default="false" clockType="pseudo" />
+  <kbase name="telecom-kbase" default="true" eventProcessingMode="stream" equalsBehavior="identity">
+    <ksession name="telecom-realtime-ksession" type="stateful" default="true" clockType="realtime"/>
+    <ksession name="telecom-pseudotime-ksession" type="stateful" default="false" clockType="pseudo"/>
   </kbase>
 </kmodule>

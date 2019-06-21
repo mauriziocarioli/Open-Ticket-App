@@ -1,18 +1,8 @@
 package com.telecom.open_ticket;
 
-import com.telecom.cep.AlertEvent;
-
 import java.util.Date;
-
-declare AlertEvent
-	@role(event)
-	@timestamp(_time)
-end
-
-global Long startTime;
-global Long startMemory;
-global Long totalFactCount;
-global java.util.HashMap issuesMap; 
+import com.telecom.Issue;
+import com.telecom.cep.AlertEvent;
 
 rule "Open Ticket If Rectifier Doesn't Come Back Up After 5 Minutes"
 dialect "mvel"
@@ -38,17 +28,16 @@ no-loop
 			circuit == $circuit,
 			ncFunction == "DELETE",
 			this after [0s, 5s] $powerIsBackUp) )
+		not( Issue( serverSerial == $rectifierServerSerial ) from issues.list)
 	then
+	    issues.create( new Issue( issues.newIssueId(), $rectifierServerSerial, $neName, $summary, $t0, $acServerSerial, $t1 ) );
 		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 		System.out.println("@");
-		System.out.println("@ Major alert at "+$neName);
-		System.out.println("@ Summary: "+$summary);
-		System.out.println("@ Rectifier with server serial "+$rectifierServerSerial);
-		System.out.println("@ went down at "+(new Date($t0)));
-		System.out.println("@ AC Power with server serial "+$acServerSerial);
-		System.out.println("@ went back up at "+(new Date($t1)));
-		System.out.println("@ Rectifier did not come back up after 10m");
-		System.out.println("@ Opened ticket # SNN000000088773 at "+(new Date()));			
+		System.out.println("@ Major Alert at "+$neName);
+		System.out.println("@");
+		System.out.println("@ Issue "+issues.getLastIssueId()+" Created");
 		System.out.println("@");
 		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+	    retract( $rectifierIsDown );
+	    retract( $powerIsBackUp );
 end

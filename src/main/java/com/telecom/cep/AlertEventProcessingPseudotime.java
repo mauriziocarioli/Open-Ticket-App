@@ -3,15 +3,19 @@
  */
 package com.telecom.cep;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-import java.util.HashMap;
 //import java.util.LinkedList;
 
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.time.SessionPseudoClock;
+
+import com.telecom.Issue;
+import com.telecom.Issues;
+import com.telecom.TicketCreated;
 
 import org.kie.api.event.rule.DebugAgendaEventListener;
 import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
@@ -22,7 +26,7 @@ public class AlertEventProcessingPseudotime {
 	 *
 	 */
 
-	private static final String PSEUDOTIME_STATEFUL_KIE_SESSION = "pseudotime-stateful-kie-session";
+	private static final String PSEUDOTIME_STATEFUL_KIE_SESSION = "telecom-pseudotime-ksession";
 	private static final String groupId = "com.telecom";
 	private static final String artifactId = "Open-Ticket-App";
 	private static final String version = "1.0.0-SNAPSHOT";
@@ -38,7 +42,9 @@ public class AlertEventProcessingPseudotime {
 	// memory sizing and reporting activities
 	static long totalFactCount = 0;
 
-	public static LinkListStack issues = new LinkListStack();
+	//public static LinkListStack issues = new LinkListStack();
+	
+	public Issues issues = new Issues();
 
 	public static AlertEventProcessingPseudotime getInstance() {
 
@@ -137,16 +143,17 @@ public class AlertEventProcessingPseudotime {
 			kServices = KieServices.Factory.get();
 			kContainer = kServices.newKieContainer(kServices.newReleaseId(groupId, artifactId, version));
 			kSession = kContainer.newKieSession(PSEUDOTIME_STATEFUL_KIE_SESSION);
-			kSession.addEventListener(new DebugAgendaEventListener());
-			kSession.addEventListener(new DebugRuleRuntimeEventListener());
+			//kSession.addEventListener(new DebugAgendaEventListener());
+			//kSession.addEventListener(new DebugRuleRuntimeEventListener());
 			clock = kSession.getSessionClock();
-			kServices.getLoggers().newConsoleLogger(kSession);
-			kServices.getLoggers().newFileLogger(kSession, "./target/drools");
+			//kServices.getLoggers().newConsoleLogger(kSession);
+			//kServices.getLoggers().newFileLogger(kSession, "./target/drools");
 
-			kSession.setGlobal("issuesMap", new HashMap<Long, AlertEventCorrelation>());
-			kSession.setGlobal("startTime", new Date().getTime());
-			kSession.setGlobal("startMemory", Runtime.getRuntime().freeMemory());
-			kSession.setGlobal("totalFactCount", totalFactCount);
+			issues.setLastIssueId(-1);
+			issues.setList(new ArrayList<Issue>());
+			kSession.setGlobal("issues", issues);
+
+			//kSession.setGlobal("issuesMap", new HashMap<Long, AlertEventCorrelation>());
 			System.out.println("initialized the kie runtime for drools fusion...");
 
 		} catch (Exception e) {
@@ -154,21 +161,34 @@ public class AlertEventProcessingPseudotime {
 		}
 	}
 
-	static long prevTime = 0, currTime = 0;
-
 	public void execute(AlertEvent event, Long previousTime) {
 
 		// try {
 		System.out.println(">>>>>> RECEIVED AN ALERT");
 
 		// anything to with event object
-		kSession.setGlobal("totalFactCount", totalFactCount++);
+		totalFactCount++;
 		System.out.println(">>>>>> RUNNING THROUGH THE RULES..." + totalFactCount);
 		clock.advanceTime(event.get_time().longValue() - previousTime.longValue(), TimeUnit.MILLISECONDS);
 		kSession.insert(event);
 		kSession.fireAllRules();
 
 		//HashMap issueM = (HashMap) kSession.getGlobal("issueMap");
+		issues = (Issues) kSession.getGlobal("issues");
+		
+		for (int i = 0; i < issues.getList().size(); i++) {
+			Issue issue = issues.getList().get(i);
+			System.out.println(">>>>>>>> Found Issue # "+issue.getIssueId());
+			System.out.println(">>>>>>>> 	ne name: "+issue.getNeName());
+			System.out.println(">>>>>>>> 	summary: "+issue.getSummary());
+			System.out.println(">>>>>>>> 	time of incident:     "+new Date(issue.getTimeOfIncident()));
+			System.out.println(">>>>>>>> 	time when AC went up: "+new Date(issue.getTimeAcBackUp()));
+			TicketCreated ticketWasCreated = new TicketCreated();
+			ticketWasCreated.setIssueId(issue.getIssueId());
+			System.out.println(">>>>>>>> Ticket is created");
+			kSession.insert(ticketWasCreated);
+			kSession.fireAllRules();
+		}
 
 		//LinkedList list = new LinkedList();
 		//list.addAll(issueM.values());
