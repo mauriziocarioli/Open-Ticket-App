@@ -131,7 +131,7 @@ public class AlertEventProcessing {
 		try {
 
 			System.out.println("==========================================================");
-			System.out.println("INITIALIZING KIE RUNTIME FOR DROOLS FUSION");
+			System.out.println("   INITIALIZING KIE RUNTIME FOR DROOLS FUSION");
 			System.out.println("==========================================================");
 			
 			kServices = KieServices.Factory.get();
@@ -147,7 +147,7 @@ public class AlertEventProcessing {
 			kSession.setGlobal("issues", issues);
 
 			//kSession.setGlobal("issuesMap", new HashMap<Long, AlertEventCorrelation>());
-			System.out.println("initialized the kie runtime for drools fusion...");
+			System.out.println("Initialized the KIE runtime for Drools Fusion...");
 
 		} catch (Exception e) {
 			e.printStackTrace();

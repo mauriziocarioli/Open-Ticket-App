@@ -16,7 +16,8 @@
 	<name>Open Ticket App</name>
 	<description></description>
 	<properties>
-		<version.org.kie>7.18.0.Final</version.org.kie>
+		<!-- RHPAM 7.5.0 -->
+		<version.org.kie>7.26.0.Final-redhat-00005</version.org.kie>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -58,12 +59,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.26</version>
+			<version>1.7.29</version>
 		</dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.6</version>
+            <version>1.7</version>
         </dependency>
 	</dependencies>
 	<build>

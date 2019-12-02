@@ -4,6 +4,7 @@
 package com.telecom.cep;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 //import java.util.LinkedList;
 
-import org.drools.core.command.runtime.AdvanceSessionTimeCommand;
+//import org.drools.core.command.runtime.AdvanceSessionTimeCommand;
 import org.kie.api.KieServices;
 import org.kie.api.command.BatchExecutionCommand;
 import org.kie.api.command.Command;
@@ -164,7 +165,7 @@ public class AlertEventProcessingPseudotimeRemote {
 			allClasses.add(Issue.class);
 			allClasses.add(Issues.class);
 			allClasses.add(TicketCreated.class);
-			//allClasses.add(AdvanceSessionTimeCommand.class);
+			// allClasses.add(AdvanceSessionTimeCommand.class);
 			String serverUrl = protocol + "://" + hostname + ":" + port + "/kie-server/services/rest/server";
 			String username = "kieserver";
 			String password = "kieserver1!";
@@ -175,11 +176,10 @@ public class AlertEventProcessingPseudotimeRemote {
 			ksClient = KieServicesFactory.newKieServicesClient(ksConfig);
 			kCommands = KieServices.Factory.get().getCommands();
 
-			List<Command> commandList = new ArrayList<Command>();
 			issues.setList(new ArrayList<Issue>());
 			issues.setLastIssueId(-1);
-			commandList.add(kCommands.newSetGlobal("issues", issues, "issues"));
-			BatchExecutionCommand batch = kCommands.newBatchExecution(commandList, PSEUDOTIME_STATEFUL_KIE_SESSION);
+			Command<?> setIssues = kCommands.newSetGlobal("issues", issues, "issues");
+			BatchExecutionCommand batch = kCommands.newBatchExecution(Arrays.asList(setIssues), PSEUDOTIME_STATEFUL_KIE_SESSION);
 			ruleClient = ksClient.getServicesClient(RuleServicesClient.class);
 			executeResponse = ruleClient.executeCommandsWithResults(containerName, batch);
 
@@ -202,13 +202,14 @@ public class AlertEventProcessingPseudotimeRemote {
 		// anything to with event object
 		totalFactCount++;
 		System.out.println(">>>>>> RUNNING THROUGH THE RULES..." + totalFactCount);
-		List<Command> commandList = new ArrayList<Command>();
-		commandList.add(kCommands.newAdvanceSessionTime(event.get_time().longValue() - previousTime.longValue(),
-				TimeUnit.MILLISECONDS));
-		commandList.add(kCommands.newInsert(event));
-		commandList.add(kCommands.newFireAllRules());
-		commandList.add(kCommands.newGetGlobal("issues"));
-		BatchExecutionCommand batch = kCommands.newBatchExecution(commandList, PSEUDOTIME_STATEFUL_KIE_SESSION);
+		Command<?> advanceSessionTime = kCommands
+				.newAdvanceSessionTime(event.get_time().longValue() - previousTime.longValue(), TimeUnit.MILLISECONDS);
+		Command<?> insertEvent = kCommands.newInsert(event);
+		Command<?> fireAllRules = kCommands.newFireAllRules();
+		Command<?> getIssues = kCommands.newGetGlobal("issues");
+		BatchExecutionCommand batch = kCommands.newBatchExecution(
+				Arrays.asList(advanceSessionTime, insertEvent, fireAllRules, getIssues),
+				PSEUDOTIME_STATEFUL_KIE_SESSION);
 		// ruleClient = ksClient.getServicesClient(RuleServicesClient.class);
 		executeResponse = ruleClient.executeCommandsWithResults(containerName, batch);
 
@@ -231,10 +232,10 @@ public class AlertEventProcessingPseudotimeRemote {
 							System.out.println(">>>>>>>> Found Issue " + issue.getIssueId());
 							TicketCreated ticketWasCreated = new TicketCreated();
 							ticketWasCreated.setIssueId(issue.getIssueId());
-							commandList = new ArrayList<Command>();
-							commandList.add(kCommands.newInsert(ticketWasCreated));
-							commandList.add(kCommands.newFireAllRules());
-							batch = kCommands.newBatchExecution(commandList, PSEUDOTIME_STATEFUL_KIE_SESSION);
+							Command<?> insertTicketCreation = kCommands.newInsert(ticketWasCreated);
+							batch = kCommands.newBatchExecution(
+									Arrays.asList(insertTicketCreation, fireAllRules), 
+									PSEUDOTIME_STATEFUL_KIE_SESSION);
 							executeResponse = ruleClient.executeCommandsWithResults(containerName, batch);
 						}
 					}

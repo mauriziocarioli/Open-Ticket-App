@@ -1,2 +1,19 @@
-= Open A Ticket If Device Doesn't Come Back Up Automatically
+= Open Ticket If Device Does Not Come Back Up
 
+A simple complex event processing use case for a telecommunication company
+implemented with Red Hat Decision Manager.
+
+When power is not automatically restored after an outage
+a technician must be dispatched to the location.
+
+Execution scripts for several scenarios are in the scripts directory.
+
+== Scenario 1: Feed csv file (local execution)
+
+* Execute script AlertDataLoaderDriver.sh
+* Search for "Major alert" in the output.
+
+== Scenario 2: Real time execution (server execution)
+
+* Deploy project Open-Ticket https://github.com/mauriziocarioli/Open-Ticket
+* Execute script server-test.py (alternatively, server-test.sh)
